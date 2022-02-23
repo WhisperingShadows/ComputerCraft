@@ -224,10 +224,11 @@ function process_incoming(id, message)
 end
 
 function handle_incoming(client_id, message_first)
-    process_incoming(id, message_first)
+    process_incoming(client_id, message_first)
 
     while true do
-        if connection_list['id'..id] == nil then
+        if connection_list['id'..client_id] == nil then
+            print('exiting handler '..client_id)
             return false
         end
 
