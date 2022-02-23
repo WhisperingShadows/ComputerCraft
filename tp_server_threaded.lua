@@ -1,5 +1,4 @@
 require('utils')
-require('threading')
 
 rednet.open('back')
 
