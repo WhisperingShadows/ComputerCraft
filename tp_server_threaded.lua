@@ -288,7 +288,7 @@ function new_connection(client_id, message)
     end
 end
 
-function mainThread() 
+function threadMain() 
     
     os.startThread(cleaner)
     os.startThread(is_connected)
