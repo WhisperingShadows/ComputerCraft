@@ -229,6 +229,7 @@ function handle_incoming(client_id, message_first)
     while true do
         if connection_list['id'..id] == nil then
             return false
+        end
 
         local id, message, proto = rednet.receive('port_net')
 
