@@ -297,6 +297,7 @@ function mainThread()
         local id, message, proto = rednet.receive('port_net')
 
         new_connection(id, message)
+    end
 
 end
 
