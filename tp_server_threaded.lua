@@ -1,4 +1,5 @@
 require('utils')
+require('threading')
 
 rednet.open('back')
 
@@ -227,9 +228,12 @@ function handle_incoming(client_id, message_first)
     process_incoming(id, message_first)
 
     while true do
+        if connection_list['id'..id] == nil then
+            return false
+
         local id, message, proto = rednet.receive('port_net')
 
-        if id == client_id then
+        if id == client_id and connection_list['id'..id] ~= nil then
             process_incoming(id, message)        
         end
     end
@@ -254,7 +258,7 @@ function is_connected()
         local id, message, proto = rednet.receive('port_net', 5)
         if message == 'silent ping' then
             rednet.send(id, 'pong', 'port_net')
-            resp_list[id] = id
+            resp_list['id'..id] = id
 
         -- perhaps rather than using a 5 second timer, just check for connection list staleness?
         -- would have to modify ping to use different protocol for each connection though
@@ -266,12 +270,11 @@ end
 
 function cleaner()
     while true do
-        t = os.startTimer(5)
-        os.pullEvent('timer')
+        sleep(6)
         local inter_list = connection_list
         for k,v in pairs(connection_list) do
-            if resp_list[k] == nil then
-                print(tostring(k)..' disconnected')
+            if resp_list['id'..v] == nil then
+                print(tostring(v)..' disconnected')
                 inter_list[k] = nil
             end
         end
@@ -281,14 +284,14 @@ function cleaner()
 end
 
 function new_connection(client_id, message)
-    if connection_list[client_id] == nil then
+    if connection_list['id'..client_id] == nil then
         print(tostring(client_id)..' connected')
-        connection_list[client_id] = client_id
+        connection_list['id'..client_id] = client_id
         os.startThread(function () handle_incoming(client_id, message) end)
     end
 end
 
-function threadMain() 
+function mainThread() 
     
     os.startThread(cleaner)
     os.startThread(is_connected)
@@ -297,7 +300,6 @@ function threadMain()
         local id, message, proto = rednet.receive('port_net')
 
         new_connection(id, message)
-    end
 
 end
 
