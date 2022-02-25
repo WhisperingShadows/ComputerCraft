@@ -187,7 +187,7 @@ function input_auto_complete(text)
             return complete_locs(current_arg)
         end
 --        return comps[previous[1]]
-    
+    end
         
 end
 
