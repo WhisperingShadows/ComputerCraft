@@ -7,6 +7,8 @@ function connect()
     return id
 end
 
+local server = connect()
+
 function assign_pocket()
     rednet.send(server, 'silent get_online', 'port_net')
     local id, message, proto = rednet.receive('port_net')
@@ -129,8 +131,6 @@ end
 if settings.get('user') == nil then
     assign_pocket()
 end
-
-local server = connect()
 
 parallel.waitForAny(handle_incoming, function() handle_outgoing(server) end, function() is_connected(server) end)
 
