@@ -1,4 +1,5 @@
 require('utils')
+local completion = require('cc.completion')
 
 rednet.open('back')
 
@@ -155,6 +156,41 @@ function teleport(loc, dim, entity, id)
     -- exec('tp '..entity..' '..loc)
 end
 
+
+function user_auto_complete(current_arg)
+   succ, out,  aff = exec('list')
+   
+   return completion.choice(current_arg, split(match('[^:]+: (.+)'), ', '))
+end
+
+function input_auto_complete(text)
+    local chunks = split(text)
+    
+    local current_arg = chunks[#chunks]
+    local index = #chunks
+    local previous = chunks
+    previous.remove(#chunks)
+    
+    if index == 1 then
+        return completion.choice(current_arg, {'locations', 'add', 'remove', 'rename', 'teleport'})
+    end
+    
+--    local comps = {
+--        }
+    
+    function complete_locs(current_arg)
+        return completion.choice(current_arg, locations)
+    end
+    
+    if index ~= 1 then
+        if contains(previous[1], {'remove', 'rm',  'rename', 'rn', 'teleport', 'tp'}) and index == 2 then
+            return complete_locs(current_arg)
+        end
+--        return comps[previous[1]]
+    
+        
+end
+
 function process_incoming(id, message)
     local chunks = split(message)
         
@@ -219,7 +255,13 @@ function process_incoming(id, message)
             print(chunks[2])
             print(locations[chunks[2]][1])
             print('TELEPORTING to '..chunks[2]..' ('..locations[chunks[2]][1]..')')
-            teleport(locations[chunks[2]][1], locations[chunks[2]][2], chunks[3], id)            
+            teleport(locations[chunks[2]][1], locations[chunks[2]][2], chunks[3], id)          
+            
+        elseif chunks[1] == 'get_online' then
+            return user_auto_complete
+            
+        elseif chunks[1] == 'get_comp_func' then
+            return completion
         end
 end
 

@@ -8,9 +8,13 @@ function connect()
 end
 
 function assign_pocket()
+    rednet.send(server, 'silent get_online', 'port_net')
+    local id, message, proto = rednet.receive('port_net')
+    user_completion = message
+    
     print('To facilitate mobile global positioning you must assign this device to a specific user. Please input your username.')
     write('Username: ')
-    local input = read()
+    local input = read(nil, nil, user_completion)
     
     settings.set('user', input)
     settings.save()
@@ -73,6 +77,10 @@ function handle_incoming()
             rednet.send(id, get_loc(message[2]), 'port_net')
         elseif message == 'ask_user' then
             rednet.send(id, get_user(), 'port_net')
+        elseif message[1] == 'confirm' then
+            write(message[2])
+            local input = read()
+            rednet.send(id, input, 'port_net')
         elseif message == 'pong' then
         
         else
@@ -81,9 +89,21 @@ function handle_incoming()
     end
 end        
 
+
+rednet.send(server, 'silent get_comp_func', 'port_net')
+local id, message, proto = rednet.receive('port_net')
+input_completion_func = message
+
 function handle_outgoing(server)
+    local history = {}
+    
     while true do
-        local input = read()
+        local input = read(nil, history, input_completion_func, nil)
+        -- TODO: Autocompletion
+        
+        if input ~= history[1] then
+            table.insert(history, 1, input)
+        end
         
         if contains(input, {'quit', 'exit', 'q'}) then
             return
