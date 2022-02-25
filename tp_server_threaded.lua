@@ -187,7 +187,7 @@ function input_auto_complete(text)
             return complete_locs(current_arg)
         end
 --        return comps[previous[1]]
-    end
+    
         
 end
 
@@ -258,10 +258,10 @@ function process_incoming(id, message)
             teleport(locations[chunks[2]][1], locations[chunks[2]][2], chunks[3], id)          
             
         elseif chunks[1] == 'get_online' then
-            return user_auto_complete
+            rednet.send(id, user_auto_complete, 'port_net') 
             
         elseif chunks[1] == 'get_comp_func' then
-            return completion
+            rednet.send(id, completion, 'port_net')
         end
 end
 
